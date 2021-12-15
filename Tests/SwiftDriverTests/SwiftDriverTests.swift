@@ -1874,10 +1874,13 @@ final class SwiftDriverTests: XCTestCase {
       }
     }
     do {
+      // tsan is not supported on Windows (yet)
+      #if !os(Windows)
       // thread sanitizer + address sanitizer recover
       try assertDriverDiagnostics(args: commonArgs + ["-sanitize=thread", "-sanitize-recover=address"]) {
         $1.expect(.warning("option '-sanitize-recover=address' has no effect when 'address' sanitizer is disabled. Use -sanitize=address to enable the sanitizer"))
       }
+      #endif
     }
     // "-sanitize=undefined" is not available on x86_64-unknown-linux-gnu
     #if os(macOS)
@@ -2044,6 +2047,8 @@ final class SwiftDriverTests: XCTestCase {
   }
 
   func testSanitizerCoverageArgs() throws {
+    // tsan is not supported on Windows (yet)
+    #if !os(Windows)
     try assertDriverDiagnostics(args: ["swiftc", "foo.swift", "-sanitize=thread", "-sanitize-coverage=bar"]) {
       $1.expect(.error("option '-sanitize-coverage=' is missing a required argument (\"func\", \"bb\", \"edge\")"))
       $1.expect(.error("unsupported argument 'bar' to option '-sanitize-coverage='"))
@@ -2052,12 +2057,16 @@ final class SwiftDriverTests: XCTestCase {
     try assertDriverDiagnostics(args: ["swiftc", "foo.swift", "-sanitize=thread", "-sanitize-coverage=func,baz"]) {
       $1.expect(.error("unsupported argument 'baz' to option '-sanitize-coverage='"))
     }
+    #endif
 
     try assertDriverDiagnostics(args: ["swiftc", "foo.swift", "-sanitize-coverage=func,trace-cmp"]) {
       $1.expect(.error("option '-sanitize-coverage=' requires a sanitizer to be enabled. Use -sanitize= to enable a sanitizer"))
     }
 
+    // tsan is not supported on Windows (yet)
+    #if !os(Windows)
     try assertNoDriverDiagnostics(args: "swiftc", "foo.swift", "-sanitize=thread", "-sanitize-coverage=edge,indirect-calls,trace-bb,trace-cmp,8bit-counters")
+    #endif
   }
 
   func testSanitizerAddressUseOdrIndicator() throws {
@@ -2070,11 +2079,16 @@ final class SwiftDriverTests: XCTestCase {
       XCTAssert(plannedJobs[0].commandLine.contains(.flag("-sanitize=address")))
       XCTAssert(plannedJobs[0].commandLine.contains(.flag("-sanitize-address-use-odr-indicator")))
     }
+
+    // tsan is not supported on Windows (yet)
+    #if !os(Windows)
     do {
       try assertDriverDiagnostics(args: ["swiftc", "-sanitize=thread", "-sanitize-address-use-odr-indicator", "Test.swift"]) {
         $1.expect(.warning("option '-sanitize-address-use-odr-indicator' has no effect when 'address' sanitizer is disabled. Use -sanitize=address to enable the sanitizer"))
       }
     }
+    #endif
+
     do {
       try assertDriverDiagnostics(args: ["swiftc", "-sanitize-address-use-odr-indicator", "Test.swift"]) {
         $1.expect(.warning("option '-sanitize-address-use-odr-indicator' has no effect when 'address' sanitizer is disabled. Use -sanitize=address to enable the sanitizer"))
