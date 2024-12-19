@@ -642,23 +642,20 @@ final class ExplicitModuleBuildTests: XCTestCase {
                                  "-module-cache-path", moduleCachePath.nativePathString(escaped: true),
                                  "-working-directory", path.nativePathString(escaped: true),
                                  main.nativePathString(escaped: true)] + sdkArgumentsForTesting
-      var driver = try Driver(args: invocationArguments,
-                              env: ProcessEnv.vars)
+      var driver = try Driver(args: invocationArguments)
       let jobs = try driver.planBuild()
       try driver.run(jobs: jobs)
       XCTAssertFalse(driver.diagnosticEngine.hasErrors)
 
       // Plan the same build one more time and ensure it does not contain dependency compilation jobs
-      var incrementalDriver = try Driver(args: invocationArguments,
-                                         env: ProcessEnv.vars)
+      var incrementalDriver = try Driver(args: invocationArguments)
       let incrementalJobs = try incrementalDriver.planBuild()
       XCTAssertFalse(incrementalJobs.contains { $0.kind == .generatePCM })
       XCTAssertFalse(incrementalJobs.contains { $0.kind == .compileModuleFromInterface })
 
       // Ensure that passing '-always-rebuild-module-dependencies' results in re-building module dependencies
       // even when up-to-date.
-      var incrementalAlwaysRebuildDriver = try Driver(args: invocationArguments + ["-always-rebuild-module-dependencies"],
-                                                      env: ProcessEnv.vars)
+      var incrementalAlwaysRebuildDriver = try Driver(args: invocationArguments + ["-always-rebuild-module-dependencies"])
       let incrementalAlwaysRebuildJobs = try incrementalAlwaysRebuildDriver.planBuild()
       XCTAssertFalse(incrementalAlwaysRebuildDriver.diagnosticEngine.hasErrors)
       XCTAssertTrue(incrementalAlwaysRebuildJobs.contains { $0.kind == .generatePCM })
@@ -1058,8 +1055,7 @@ final class ExplicitModuleBuildTests: XCTestCase {
                                      "-module-cache-path", path.nativePathString(escaped: true),
                                      "-I", stdLibPath.nativePathString(escaped: true),
                                      "-I", shimsPath.nativePathString(escaped: true),
-                              ] + sdkArgumentsForTesting,
-                              env: ProcessEnv.vars)
+                              ] + sdkArgumentsForTesting)
       guard driver.isFrontendArgSupported(.moduleAlias) else {
         throw XCTSkip("Skipping: compiler does not support '-module-alias'")
       }
@@ -1285,8 +1281,7 @@ final class ExplicitModuleBuildTests: XCTestCase {
                                       srcBar.nativePathString(escaped: true),
                                       "-I", stdLibPath.nativePathString(escaped: true),
                                       "-I", shimsPath.nativePathString(escaped: true),
-                                     ] + sdkArgumentsForTesting,
-                               env: ProcessEnv.vars)
+                                     ] + sdkArgumentsForTesting)
       guard driver1.isFrontendArgSupported(.moduleAlias) else {
         throw XCTSkip("Skipping: compiler does not support '-module-alias'")
       }
@@ -1322,8 +1317,7 @@ final class ExplicitModuleBuildTests: XCTestCase {
                                       srcFoo.nativePathString(escaped: true),
                                       "-I", stdLibPath.nativePathString(escaped: true),
                                       "-I", shimsPath.nativePathString(escaped: true),
-                                      ] + sdkArgumentsForTesting,
-                               env: ProcessEnv.vars)
+                                      ] + sdkArgumentsForTesting)
       let jobs2 = try driver2.planBuild()
       try driver2.run(jobs: jobs2)
       XCTAssertFalse(driver2.diagnosticEngine.hasErrors)
@@ -1358,8 +1352,7 @@ final class ExplicitModuleBuildTests: XCTestCase {
                                      "-explicit-module-build",
                                      "-module-cache-path", moduleCachePath.nativePathString(escaped: true),
                                      "-working-directory", path.nativePathString(escaped: true),
-                                     main.nativePathString(escaped: true)] + sdkArgumentsForTesting,
-                              env: ProcessEnv.vars)
+                                     main.nativePathString(escaped: true)] + sdkArgumentsForTesting)
       let jobs = try driver.planBuild()
       try driver.run(jobs: jobs)
       XCTAssertFalse(driver.diagnosticEngine.hasErrors)
@@ -1397,8 +1390,7 @@ final class ExplicitModuleBuildTests: XCTestCase {
                                         frameworkModulePath.nativePathString(escaped: true),
                                         "-working-directory",
                                         path.nativePathString(escaped: true),
-                                        fooSourcePath.nativePathString(escaped: true)] + sdkArgumentsForTesting,
-                                 env: ProcessEnv.vars)
+                                        fooSourcePath.nativePathString(escaped: true)] + sdkArgumentsForTesting)
       let jobs = try driverFoo.planBuild()
       try driverFoo.run(jobs: jobs)
       XCTAssertFalse(driverFoo.diagnosticEngine.hasErrors)
@@ -1418,8 +1410,7 @@ final class ExplicitModuleBuildTests: XCTestCase {
                                      "-explicit-module-build",
                                      "-module-name", "main",
                                      "-working-directory", path.nativePathString(escaped: true),
-                                     mainSourcePath.nativePathString(escaped: true)] + sdkArgumentsForTesting,
-                              env: ProcessEnv.vars)
+                                     mainSourcePath.nativePathString(escaped: true)] + sdkArgumentsForTesting)
       let resolver = try ArgsResolver(fileSystem: localFileSystem)
       var scannerCommand = try driver.dependencyScannerInvocationCommand().1.map { try resolver.resolve($0) }
       if scannerCommand.first == "-frontend" {
@@ -1510,8 +1501,7 @@ final class ExplicitModuleBuildTests: XCTestCase {
       var driver = try Driver(args: ["swiftc",
                                      "-explicit-module-build",
                                      "-working-directory", path.nativePathString(escaped: true),
-                                     main.nativePathString(escaped: true)] + lotsOfInputs + sdkArgumentsForTesting,
-                              env: ProcessEnv.vars)
+                                     main.nativePathString(escaped: true)] + lotsOfInputs + sdkArgumentsForTesting)
       let scannerJob = try driver.dependencyScanningJob()
 
       let resolver = try ArgsResolver(fileSystem: localFileSystem)
@@ -1536,8 +1526,7 @@ final class ExplicitModuleBuildTests: XCTestCase {
                                      "-module-cache-path",
                                      moduleCachePath.nativePathString(escaped: true),
                                      "-working-directory", path.nativePathString(escaped: true),
-                                     main.nativePathString(escaped: true)] + sdkArgumentsForTesting,
-                              env: ProcessEnv.vars)
+                                     main.nativePathString(escaped: true)] + sdkArgumentsForTesting)
       guard driver.isFrontendArgSupported(.clangScannerModuleCachePath) else {
         throw XCTSkip("Skipping: compiler does not support '-clang-scanner-module-cache-path'")
       }
@@ -1579,8 +1568,7 @@ final class ExplicitModuleBuildTests: XCTestCase {
                                      "-explicit-module-build",
                                      "-working-directory", path.nativePathString(escaped: true),
                                      "-disable-clang-target",
-                                     main.nativePathString(escaped: true)] + sdkArgumentsForTesting,
-                              env: ProcessEnv.vars)
+                                     main.nativePathString(escaped: true)] + sdkArgumentsForTesting)
       let resolver = try ArgsResolver(fileSystem: localFileSystem)
       var scannerCommand = try driver.dependencyScannerInvocationCommand().1.map { try resolver.resolve($0) }
       if scannerCommand.first == "-frontend" {
@@ -1652,8 +1640,7 @@ final class ExplicitModuleBuildTests: XCTestCase {
                                      "-explicit-module-build",
                                      "-working-directory", path.nativePathString(escaped: true),
                                      "-disable-clang-target",
-                                     main.nativePathString(escaped: true)] + sdkArgumentsForTesting,
-                              env: ProcessEnv.vars)
+                                     main.nativePathString(escaped: true)] + sdkArgumentsForTesting)
       let resolver = try ArgsResolver(fileSystem: localFileSystem)
       var scannerCommand = try driver.dependencyScannerInvocationCommand().1.map { try resolver.resolve($0) }
       if scannerCommand.first == "-frontend" {
@@ -1744,8 +1731,7 @@ final class ExplicitModuleBuildTests: XCTestCase {
                                      "-explicit-module-build",
                                      "-working-directory", path.nativePathString(escaped: true),
                                      "-disable-clang-target",
-                                     main.nativePathString(escaped: true)] + sdkArgumentsForTesting,
-                              env: ProcessEnv.vars)
+                                     main.nativePathString(escaped: true)] + sdkArgumentsForTesting)
       let resolver = try ArgsResolver(fileSystem: localFileSystem)
       var scannerCommand = try driver.dependencyScannerInvocationCommand().1.map { try resolver.resolve($0) }
       // We generate full swiftc -frontend -scan-dependencies invocations in order to also be
@@ -1927,8 +1913,7 @@ final class ExplicitModuleBuildTests: XCTestCase {
                                       ["-module-name","testParallelDependencyScanningDiagnostics\(fileIndex)"] +
                                        // FIXME: We need to differentiate the scanning action hash,
                                        // though the module-name above should be sufficient.
-                                      ["-I/tmp/foo/bar/\(fileIndex)"],
-                                env: ProcessEnv.vars)
+                                      ["-I/tmp/foo/bar/\(fileIndex)"])
         var scannerCommand = try driver.dependencyScannerInvocationCommand().1.map { try resolver.resolve($0) }
         if scannerCommand.first == "-frontend" {
           scannerCommand.removeFirst()
@@ -2109,8 +2094,7 @@ final class ExplicitModuleBuildTests: XCTestCase {
                                        "-explicit-module-build",
                                        "-working-directory", path.nativePathString(escaped: true),
                                        "-disable-clang-target",
-                                       main.nativePathString(escaped: true)] + sdkArgumentsForTesting,
-                                env: ProcessEnv.vars)
+                                       main.nativePathString(escaped: true)] + sdkArgumentsForTesting)
         let resolver = try ArgsResolver(fileSystem: localFileSystem)
         var scannerCommand = try driver.dependencyScannerInvocationCommand().1.map { try resolver.resolve($0) }
         if scannerCommand.first == "-frontend" {
@@ -2239,8 +2223,7 @@ final class ExplicitModuleBuildTests: XCTestCase {
                                        "-module-cache-path", moduleCachePath.nativePathString(escaped: true),
                                        "-working-directory", path.nativePathString(escaped: true),
                                        "-explain-module-dependency-detailed", "A",
-                                       main.nativePathString(escaped: true)] + sdkArgumentsForTesting,
-                                env: ProcessEnv.vars)
+                                       main.nativePathString(escaped: true)] + sdkArgumentsForTesting)
         let jobs = try driver.planBuild()
         try driver.run(jobs: jobs)
         XCTAssertTrue(!driver.diagnosticEngine.diagnostics.isEmpty)
@@ -2267,8 +2250,7 @@ final class ExplicitModuleBuildTests: XCTestCase {
                                        "-module-cache-path", moduleCachePath.nativePathString(escaped: true),
                                        "-working-directory", path.nativePathString(escaped: true),
                                        "-explain-module-dependency", "A",
-                                       main.nativePathString(escaped: true)] + sdkArgumentsForTesting,
-                                env: ProcessEnv.vars)
+                                       main.nativePathString(escaped: true)] + sdkArgumentsForTesting)
         let jobs = try driver.planBuild()
         try driver.run(jobs: jobs)
         XCTAssertTrue(!driver.diagnosticEngine.diagnostics.isEmpty)
@@ -2313,8 +2295,7 @@ final class ExplicitModuleBuildTests: XCTestCase {
                                      "-working-directory", path.nativePathString(escaped: true),
                                      "-emit-module", outputModule.nativePathString(escaped: true),
                                      "-experimental-emit-module-separately",
-                                     fileA.nativePathString(escaped: true), fileB.nativePathString(escaped: true)] + sdkArgumentsForTesting,
-                              env: ProcessEnv.vars)
+                                     fileA.nativePathString(escaped: true), fileB.nativePathString(escaped: true)] + sdkArgumentsForTesting)
       let jobs = try driver.planBuild()
       let compileJobs = jobs.filter({ $0.kind == .compile })
       XCTAssertEqual(compileJobs.count, 0)
