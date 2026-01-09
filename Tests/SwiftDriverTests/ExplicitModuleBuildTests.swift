@@ -916,12 +916,12 @@ final class ExplicitModuleBuildTests: XCTestCase {
       let sdkArgumentsForTesting = (try? Driver.sdkArgumentsForTesting()) ?? []
       let invocationArguments = ["swiftc",
                                  "-Xcc", "-Xclang", "-Xcc", "-fbuiltin-headers-in-system-modules",
-                                 "-I", cHeadersPath.nativePathString(escaped: true),
-                                 "-I", swiftModuleInterfacesPath.nativePathString(escaped: true),
+                                 "-I", cHeadersPath.nativePathString(escaped: false),
+                                 "-I", swiftModuleInterfacesPath.nativePathString(escaped: false),
                                  "-explicit-module-build",
-                                 "-module-cache-path", moduleCachePath.nativePathString(escaped: true),
-                                 "-working-directory", path.nativePathString(escaped: true),
-                                 main.nativePathString(escaped: true)] + sdkArgumentsForTesting
+                                 "-module-cache-path", moduleCachePath.nativePathString(escaped: false),
+                                 "-working-directory", path.nativePathString(escaped: false),
+                                 main.nativePathString(escaped: false)] + sdkArgumentsForTesting
       var driver = try Driver(args: invocationArguments)
       let jobs = try driver.planBuild()
       try driver.run(jobs: jobs)
@@ -1003,14 +1003,14 @@ final class ExplicitModuleBuildTests: XCTestCase {
                                  "-emit-module",
                                  "-enable-library-evolution", "-emit-module-interface", "-driver-show-incremental",
                                  "-Xcc", "-Xclang", "-Xcc", "-fbuiltin-headers-in-system-modules",
-                                 "-I", cHeadersPath.nativePathString(escaped: true),
-                                 "-I", swiftModuleInterfacesPath.nativePathString(escaped: true),
+                                 "-I", cHeadersPath.nativePathString(escaped: false),
+                                 "-I", swiftModuleInterfacesPath.nativePathString(escaped: false),
                                  "-explicit-module-build",
-                                 "-emit-module-interface-path", swiftInterfaceOutput.nativePathString(escaped: true),
-                                 "-output-file-map", outputFileMap.nativePathString(escaped: true),
-                                 "-module-cache-path", moduleCachePath.nativePathString(escaped: true),
-                                 "-working-directory", path.nativePathString(escaped: true),
-                                 main.nativePathString(escaped: true)] + sdkArgumentsForTesting
+                                 "-emit-module-interface-path", swiftInterfaceOutput.nativePathString(escaped: false),
+                                 "-output-file-map", outputFileMap.nativePathString(escaped: false),
+                                 "-module-cache-path", moduleCachePath.nativePathString(escaped: false),
+                                 "-working-directory", path.nativePathString(escaped: false),
+                                 main.nativePathString(escaped: false)] + sdkArgumentsForTesting
       var driver = try Driver(args: invocationArguments)
       let jobs = try driver.planBuild()
       try driver.run(jobs: jobs)
