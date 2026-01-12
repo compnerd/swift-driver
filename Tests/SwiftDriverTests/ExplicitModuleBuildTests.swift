@@ -915,22 +915,23 @@ final class ExplicitModuleBuildTests: XCTestCase {
                             .appending(component: "Swift")
       let sdkArgumentsForTesting = (try? Driver.sdkArgumentsForTesting()) ?? []
       let invocationArguments = ["swiftc",
-                                 "-Xcc", "-Xclang", "-Xcc", "-fbuiltin-headers-in-system-modules",
                                  "-I", cHeadersPath.nativePathString(escaped: false),
                                  "-I", swiftModuleInterfacesPath.nativePathString(escaped: false),
                                  "-explicit-module-build",
                                  "-module-cache-path", moduleCachePath.nativePathString(escaped: false),
                                  "-working-directory", path.nativePathString(escaped: false),
                                  main.nativePathString(escaped: false)] + sdkArgumentsForTesting
-      var driver = try Driver(args: invocationArguments)
+      var driver = try Driver(args: invocationArguments + ["-driver-show-incremental"])
       let jobs = try driver.planBuild()
       try driver.run(jobs: jobs)
       XCTAssertFalse(driver.diagnosticEngine.hasErrors)
 
       // Plan the same build one more time and ensure it does not contain dependency compilation jobs
-      var incrementalDriver = try Driver(args: invocationArguments)
+      var incrementalDriver = try Driver(args: invocationArguments + ["-driver-show-incremental"])
       let incrementalJobs = try incrementalDriver.planBuild()
+print(incrementalJobs.filter { $0.kind == .generatePCM })
       XCTAssertFalse(incrementalJobs.contains { $0.kind == .generatePCM })
+print(incrementalJobs.filter { $0.kind == .compileModuleFromInterface })
       XCTAssertFalse(incrementalJobs.contains { $0.kind == .compileModuleFromInterface })
 
       // Ensure that passing '-always-rebuild-module-dependencies' results in re-building module dependencies

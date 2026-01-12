@@ -179,10 +179,12 @@ internal extension InterModuleDependencyGraph {
                                       cas: SwiftScanCAS?,
                                       reporter: IncrementalCompilationState.Reporter?) throws -> Bool {
     let checkedModuleInfo = try moduleInfo(of: moduleID)
+print("verifyModuleDependencyUpToDate(\(moduleID.moduleName))")
     // Check if there is a module cache key available, then the content that pointed by the cache key must
     // exist for module to be up-to-date. Treat any CAS error as missing.
     let missingFromCAS = (try? outputMissingFromCAS(moduleInfo: checkedModuleInfo, cas: cas)) ?? true
     if missingFromCAS {
+print("\(moduleID.moduleName) missing in CAS")
       reporter?.reportExplicitDependencyMissingFromCAS(moduleID.moduleName)
       return false
     }
@@ -190,11 +192,14 @@ internal extension InterModuleDependencyGraph {
     // Verify that the specified input exists and is older than the specified output
     let verifyInputOlderThanOutputModTime: (String, VirtualPath, TimePoint) -> Bool =
     { moduleName, inputPath, outputModTime in
+print("Input: \(inputPath.description)")
       guard let inputModTime =
               try? fileSystem.lastModificationTime(for: inputPath) else {
+print("\tstat failure from \(fileSystem)")
         reporter?.report("Unable to 'stat' \(inputPath.description)")
         return false
       }
+print("\t\tstat returned \(inputModTime) [output: \(outputModTime)]")
       // SHA256 hashes for these files from the previous build are not
       // currently stored, so we can only check timestamps
       if inputModTime > outputModTime {
@@ -206,6 +211,7 @@ internal extension InterModuleDependencyGraph {
     }
 
     // Check if the output file exists
+print("output: \(VirtualPath.lookup(checkedModuleInfo.modulePath.path))")
     guard let outputModTime = try? fileSystem.lastModificationTime(for: VirtualPath.lookup(checkedModuleInfo.modulePath.path)) else {
       reporter?.report("Module output not found: '\(moduleID.moduleNameForDiagnostic)'")
       return false

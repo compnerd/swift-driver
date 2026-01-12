@@ -159,7 +159,7 @@ extension Driver {
     }
 
     try addPrecompileModuleDependenciesJobs(explicitModulePlanner: explicitModulePlanner,
-                                            incrementalRemarks: initialIncrementalState != nil && initialIncrementalState!.incrementalOptions.contains(.showIncremental),
+                                            incrementalRemarks: true /* initialIncrementalState != nil && initialIncrementalState!.incrementalOptions.contains(.showIncremental) */,
                                             addJob: addJobBeforeCompiles)
     let pchCompileJob = try addPrecompileBridgingHeaderJob(explicitModulePlanner: explicitModulePlanner)
     if pchCompileJob != nil {
